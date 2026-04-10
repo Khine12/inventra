@@ -1,7 +1,7 @@
 annotated-doc==0.0.4
 annotated-types==0.7.0
 anyio==4.13.0
-bcrypt==5.0.0
+bcrypt==4.0.1
 certifi==2026.2.25
 charset-normalizer==3.4.7
 click==8.3.2
@@ -20,6 +20,7 @@ pydantic==2.12.5
 pydantic_core==2.41.5
 python-dotenv==1.2.2
 python-jose==3.5.0
+python-multipart==0.0.26
 requests==2.33.1
 resend==2.27.0
 rsa==4.9.1
