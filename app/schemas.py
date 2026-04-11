@@ -25,6 +25,7 @@ class ProductCreate(BaseModel):
     name: str
     sku: str
     quantity: int
+    cost_price: float = 0.0
     price: float
     low_stock_threshold: int = 10
     expiry_date: Optional[datetime] = None
@@ -34,6 +35,7 @@ class ProductResponse(BaseModel):
     name: str
     sku: str
     quantity: int
+    cost_price: float
     price: float
     low_stock_threshold: int
     expiry_date: Optional[datetime]
