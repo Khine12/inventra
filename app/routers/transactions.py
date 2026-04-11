@@ -4,6 +4,7 @@ from app.database import get_db
 from app.models import Product, Transaction, TransactionType, User
 from app.schemas import TransactionCreate, TransactionResponse
 from app.routers.auth import get_current_user
+from app.email import send_transaction_receipt
 from typing import List
 
 router = APIRouter(prefix="/transactions", tags=["Transactions"])
@@ -43,6 +44,15 @@ def create_transaction(
     db.add(new_transaction)
     db.commit()
     db.refresh(new_transaction)
+
+    send_transaction_receipt(
+        to_email=current_user.email,
+        product_name=product.name,
+        transaction_type=transaction.type.value,
+        quantity=transaction.quantity,
+        note=transaction.note
+    )
+
     return new_transaction
 
 @router.get("/", response_model=List[TransactionResponse])
