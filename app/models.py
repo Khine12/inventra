@@ -27,6 +27,7 @@ class Product(Base):
     sku = Column(String, unique=True, index=True, nullable=False)
     quantity = Column(Integer, default=0, nullable=False)
     price = Column(Float, nullable=False)
+    cost_price = Column(Float, nullable=True, default=0.0)
     low_stock_threshold = Column(Integer, default=10)
     expiry_date = Column(DateTime(timezone=True), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
