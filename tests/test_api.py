@@ -73,16 +73,15 @@ def test_get_products():
 
 def test_negative_stock_guard():
     token = get_token()
-    client.post("/products/", json={
+    unique = random.randint(1000, 9999)
+    create_response = client.post("/products/", json={
         "name": "Low Stock Item",
-        "sku": "LS-001",
+        "sku": f"LS-{unique}",
         "quantity": 5,
         "price": 1.99,
         "low_stock_threshold": 2
     }, headers={"Authorization": f"Bearer {token}"})
-    products = client.get("/products/",
-        headers={"Authorization": f"Bearer {token}"}).json()
-    product_id = products[-1]["id"]
+    product_id = create_response.json()["id"]
     response = client.post("/transactions/", json={
         "product_id": product_id,
         "type": "sale",
