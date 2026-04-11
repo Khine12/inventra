@@ -75,3 +75,54 @@ A production-grade REST API for small business inventory management. Built with 
 ---
 
 ## Architecture
+React Frontend (Vercel)
+↓
+FastAPI REST API (Render)
+↓
+PostgreSQL Database (Neon)
+↓
+Resend API → Email receipts to seller
+APScheduler → Daily 8AM low-stock & expiry alerts
+
+---
+
+## Local Development
+
+```bash
+# Clone the repo
+git clone https://github.com/Khine12/inventra.git
+cd inventra
+
+# Create virtual environment
+python -m venv venv
+venv\Scripts\activate  # Windows
+source venv/bin/activate  # Mac/Linux
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Create .env file
+cp .env.example .env
+# Fill in your values
+
+# Run the server
+uvicorn app.main:app --reload
+
+# Run tests
+pytest tests/ -v
+```
+
+---
+
+## Environment Variables
+DATABASE_URL=your_neon_postgresql_connection_string
+SECRET_KEY=your_secret_key
+ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=30
+RESEND_API_KEY=your_resend_api_key
+
+---
+
+## CI/CD
+
+GitHub Actions automatically runs the full pytest suite on every push to `main`. All 9 tests must pass before deployment.
