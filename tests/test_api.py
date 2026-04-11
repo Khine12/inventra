@@ -1,4 +1,5 @@
 import pytest
+import random
 from fastapi.testclient import TestClient
 from app.main import app
 
@@ -38,22 +39,24 @@ def test_login_valid():
     assert "access_token" in response.json()
 
 def get_token():
+    unique = random.randint(1000, 9999)
     client.post("/auth/register", json={
-        "email": "producttest@test.com",
+        "email": f"producttest{unique}@test.com",
         "full_name": "Product Test",
         "password": "testpassword123"
     })
     response = client.post("/auth/login", data={
-        "username": "producttest@test.com",
+        "username": f"producttest{unique}@test.com",
         "password": "testpassword123"
     })
     return response.json()["access_token"]
 
 def test_create_product():
     token = get_token()
+    unique = random.randint(1000, 9999)
     response = client.post("/products/", json={
         "name": "Test Product",
-        "sku": "TP-001",
+        "sku": f"TP-{unique}",
         "quantity": 100,
         "price": 9.99,
         "low_stock_threshold": 10
