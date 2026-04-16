@@ -5,6 +5,7 @@ from app.models import Product
 from app.schemas import ProductCreate, ProductResponse
 from app.routers.auth import get_current_user
 from app.models import User
+from app.models import Product, Transaction  
 from typing import List
 
 router = APIRouter(prefix="/products", tags=["Products"])
@@ -47,6 +48,7 @@ def delete_product(product_id: int, db: Session = Depends(get_db), current_user:
     product = db.query(Product).filter(Product.id == product_id, Product.owner_id == current_user.id).first()
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
+    db.query(Transaction).filter(Transaction.product_id == product_id).delete()
     db.delete(product)
     db.commit()
     return {"message": "Product deleted"}
