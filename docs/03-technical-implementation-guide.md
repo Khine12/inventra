@@ -115,10 +115,10 @@ service function with the authenticated user's id, and translates domain excepti
 | `POST /auth/register` | Create account | — |
 | `POST /auth/login` | Get JWT | — |
 | `GET /products/` | List products | `lookup_stock(db, owner_id)` |
-| `GET /products/{id}` | One product | `lookup_stock(db, owner_id, id)` |
+| `GET /products/{product_id}` | One product | `lookup_stock(db, owner_id, product_id)` |
 | `POST /products/` | Create product | (create) |
-| `PUT /products/{id}` | Update product | (update) |
-| `DELETE /products/{id}` | Delete product | (delete) |
+| `PUT /products/{product_id}` | Update product | (update) |
+| `DELETE /products/{product_id}` | Delete product | (delete) |
 | `POST /transactions/` | Record sale/restock | `record_transaction(...)` then send email receipt |
 | `GET /transactions/` | Transaction history | (list) |
 | `GET /alerts/low-stock` | Low-stock products | `list_low_stock(...)` |
@@ -126,9 +126,8 @@ service function with the authenticated user's id, and translates domain excepti
 | `GET /alerts/dashboard` | Dashboard counts | `get_dashboard_summary(...)` |
 | `GET /alerts/analytics/revenue` | Revenue analytics | `get_revenue_analytics(...)` |
 
-> Verify exact CRUD paths/signatures against the repo's OpenAPI spec
-> (`GET /openapi.json` or `/docs`) before final submission; the create/update/delete
-> shapes follow standard FastAPI + Pydantic CRUD conventions.
+> These paths were verified against the live FastAPI app's OpenAPI schema; the
+> create/update/delete shapes follow standard FastAPI + Pydantic CRUD conventions.
 
 **Email side effect:** only `POST /transactions/` sends a Resend receipt, and it does so
 in the router *after* the service call returns — never inside the service function.
