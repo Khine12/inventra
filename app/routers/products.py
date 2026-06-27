@@ -5,7 +5,9 @@ from app.models import Product
 from app.schemas import ProductCreate, ProductResponse
 from app.routers.auth import get_current_user
 from app.models import User
-from app.models import Product, Transaction  
+from app.models import Product, Transaction
+from app.services import products as products_service
+from app.exceptions import ProductNotFoundError
 from typing import List
 
 router = APIRouter(prefix="/products", tags=["Products"])
@@ -23,14 +25,14 @@ def create_product(product: ProductCreate, db: Session = Depends(get_db), curren
 
 @router.get("/", response_model=List[ProductResponse])
 def get_products(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    return db.query(Product).filter(Product.owner_id == current_user.id).all()
+    return products_service.lookup_stock(db, current_user.id)
 
 @router.get("/{product_id}", response_model=ProductResponse)
 def get_product(product_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    product = db.query(Product).filter(Product.id == product_id, Product.owner_id == current_user.id).first()
-    if not product:
+    try:
+        return products_service.lookup_stock(db, current_user.id, product_id=product_id)
+    except ProductNotFoundError:
         raise HTTPException(status_code=404, detail="Product not found")
-    return product
 
 @router.put("/{product_id}", response_model=ProductResponse)
 def update_product(product_id: int, product_data: ProductCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):

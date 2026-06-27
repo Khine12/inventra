@@ -5,6 +5,8 @@ from app.models import Product, Transaction, TransactionType, User
 from app.schemas import TransactionCreate, TransactionResponse
 from app.routers.auth import get_current_user
 from app.email import send_transaction_receipt
+from app.services import transactions as transactions_service
+from app.exceptions import ProductNotFoundError, InsufficientStockError
 from typing import List
 
 router = APIRouter(prefix="/transactions", tags=["Transactions"])
@@ -15,39 +17,26 @@ def create_transaction(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    product = db.query(Product).filter(
-        Product.id == transaction.product_id,
-        Product.owner_id == current_user.id
-    ).first()
-
-    if not product:
+    try:
+        new_transaction = transactions_service.record_transaction(
+            db,
+            current_user.id,
+            transaction.product_id,
+            transaction.type,
+            transaction.quantity,
+            transaction.note,
+        )
+    except ProductNotFoundError:
         raise HTTPException(status_code=404, detail="Product not found")
-
-    if transaction.type == TransactionType.sale:
-        if product.quantity < transaction.quantity:
-            raise HTTPException(
-                status_code=400,
-                detail=f"Not enough stock. Available: {product.quantity}"
-            )
-        product.quantity -= transaction.quantity
-
-    elif transaction.type == TransactionType.restock:
-        product.quantity += transaction.quantity
-
-    new_transaction = Transaction(
-        product_id=transaction.product_id,
-        type=transaction.type,
-        quantity=transaction.quantity,
-        note=transaction.note
-    )
-
-    db.add(new_transaction)
-    db.commit()
-    db.refresh(new_transaction)
+    except InsufficientStockError as e:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Not enough stock. Available: {e.available}"
+        )
 
     send_transaction_receipt(
         to_email=current_user.email,
-        product_name=product.name,
+        product_name=new_transaction.product.name,
         transaction_type=transaction.type.value,
         quantity=transaction.quantity,
         note=transaction.note
