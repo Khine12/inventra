@@ -83,6 +83,29 @@ claude mcp add inventra -e INVENTRA_OWNER_EMAIL=owner@example.com -- <venv-pytho
 
 ---
 
+## Connect to Claude Code
+
+The command above registers the server, but two things have to be right before
+`claude mcp get inventra` reports `Status: ✓ Connected`:
+
+```bash
+claude mcp add inventra -e INVENTRA_OWNER_EMAIL=<real-seeded-email> -- <venv-python> -m app.mcp_server
+```
+
+> **Gotcha 1 — cwd:** `claude mcp add` has no `--cwd` flag, but `python -m app.mcp_server`
+> only resolves the `app` package when launched from the repo root. Without it, Claude
+> Code spawns the process from its own working directory and the server fails with
+> `ModuleNotFoundError: No module named 'app'`. Fix it by adding `"cwd": "<repo-root>"`
+> directly to the `inventra` entry in `~/.claude.json` — the field isn't exposed by the
+> `add` CLI, but the runtime honors it.
+>
+> **Gotcha 2 — owner email:** `INVENTRA_OWNER_EMAIL` must be a real, already-registered
+> Inventra account, not the `owner@example.com` placeholder. The server resolves this
+> user at startup and intentionally raises an error rather than starting in a broken
+> state if no matching account exists.
+
+---
+
 ## Tech Stack
 
 | Layer | Technology |
