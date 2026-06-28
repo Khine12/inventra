@@ -1,3 +1,5 @@
+import logging
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.database import get_db
@@ -8,6 +10,8 @@ from app.email import send_transaction_receipt
 from app.services import transactions as transactions_service
 from app.exceptions import ProductNotFoundError, InsufficientStockError
 from typing import List
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/transactions", tags=["Transactions"])
 
@@ -34,13 +38,16 @@ def create_transaction(
             detail=f"Not enough stock. Available: {e.available}"
         )
 
-    send_transaction_receipt(
-        to_email=current_user.email,
-        product_name=new_transaction.product.name,
-        transaction_type=transaction.type.value,
-        quantity=transaction.quantity,
-        note=transaction.note
-    )
+    try:
+        send_transaction_receipt(
+            to_email=current_user.email,
+            product_name=new_transaction.product.name,
+            transaction_type=transaction.type.value,
+            quantity=transaction.quantity,
+            note=transaction.note
+        )
+    except Exception:
+        logger.warning("Failed to send transaction receipt email", exc_info=True)
 
     return new_transaction
 
