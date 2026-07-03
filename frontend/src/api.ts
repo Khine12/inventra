@@ -60,6 +60,29 @@ export async function login(email: string, password: string): Promise<string> {
   return data.access_token as string;
 }
 
+export async function register(
+  email: string,
+  password: string,
+  fullName: string
+): Promise<void> {
+  const res = await fetch(`${API_URL}/auth/register`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password, full_name: fullName }),
+  });
+
+  if (!res.ok) {
+    let detail = res.statusText;
+    try {
+      const body = await res.json();
+      detail = body.detail ?? detail;
+    } catch {
+      // no JSON body
+    }
+    throw new ApiError(res.status, detail);
+  }
+}
+
 export function getProducts(token: string): Promise<Product[]> {
   return request<Product[]>("/products/", token);
 }
